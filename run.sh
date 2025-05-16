@@ -29,13 +29,15 @@ fi
 
 set -x
 
-# if there is no custom style mounted, then use osm-carto
-if [ ! "$(ls -A /data/style/)" ]; then
-    mv /home/renderer/src/openstreetmap-carto-backup/* /data/style/
+# If /data/style is empty (e.g., fresh volume), copy in the default style from backup
+if [ ! "$(ls -A /data/style/ 2>/dev/null)" ]; then
+    echo "INFO: /data/style is empty – copying default openstreetmap-carto style..."
+    cp -r /home/renderer/src/openstreetmap-carto-backup/* /data/style/
 fi
 
-# carto build
+# Build mapnik.xml only if it doesn't already exist
 if [ ! -f /data/style/mapnik.xml ]; then
+    echo "INFO: Generating mapnik.xml from project.mml using carto..."
     cd /data/style/
     carto ${NAME_MML:-project.mml} > mapnik.xml
 fi
