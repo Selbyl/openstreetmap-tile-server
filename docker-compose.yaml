@@ -19,7 +19,6 @@ services:
       - /srv/osm-cache:/var/lib/mod_tile
       - /srv/osm-flat:/cache
       - /srv/osm-wal:/var/lib/postgresql/16/main/pg_wal
-      - /srv/osm-data/style/data:/data/style/data
     deploy:
       resources:
         limits:
