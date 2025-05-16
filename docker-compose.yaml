@@ -4,8 +4,8 @@ services:
     # build the image FROM SOURCE
     # ──────────────────────────────
     build:
-      context: ./Dockerfile  # location of Dockerfile
-      dockerfile: Dockerfile                 # optional; default is fine
+      context: ./  # location of Dockerfile
+      dockerfile: ./Dockerfile                 # optional; default is fine
     image: osm-tiles:local                   # tag so tileserver can reuse it
     container_name: daylight_import
     command: import
