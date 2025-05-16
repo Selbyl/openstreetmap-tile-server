@@ -16,14 +16,14 @@ RUN apt-get update \
 ###########################################################################################################
 
 FROM compiler-common AS compiler-stylesheet
-RUN cd ~ \
-RUN git clone --depth 1 --branch v5.9.0 https://github.com/gravitystorm/openstreetmap-carto.git /root/openstreetmap-carto
-RUN cd /root/openstreetmap-carto \
-&& sed -i 's/, "unifont Medium", "Unifont Upper Medium"//g' style/fonts.mss \
-&& sed -i 's/"Noto Sans Tibetan Regular",//g' style/fonts.mss \
-&& sed -i 's/"Noto Sans Tibetan Bold",//g' style/fonts.mss \
-&& sed -i 's/Noto Sans Syriac Eastern Regular/Noto Sans Syriac Regular/g' style/fonts.mss \
-&& rm -rf .git
+
+RUN git clone --depth 1 --branch v5.9.0 https://github.com/gravitystorm/openstreetmap-carto.git /tmp/openstreetmap-carto && \
+    sed -i 's/, "unifont Medium", "Unifont Upper Medium"//g' /tmp/openstreetmap-carto/style/fonts.mss && \
+    sed -i 's/"Noto Sans Tibetan Regular",//g' /tmp/openstreetmap-carto/style/fonts.mss && \
+    sed -i 's/"Noto Sans Tibetan Bold",//g' /tmp/openstreetmap-carto/style/fonts.mss && \
+    sed -i 's/Noto Sans Syriac Eastern Regular/Noto Sans Syriac Regular/g' /tmp/openstreetmap-carto/style/fonts.mss && \
+    rm -rf /tmp/openstreetmap-carto/.git
+
 
 ###########################################################################################################
 
@@ -165,7 +165,7 @@ MAXZOOM=20' >> /etc/renderd.conf \
 # Install helper script
 COPY --from=compiler-helper-script /home/renderer/src/regional /home/renderer/src/regional
 
-COPY --from=compiler-stylesheet /root/openstreetmap-carto /home/renderer/src/openstreetmap-carto-backup
+COPY --from=compiler-stylesheet /tmp/openstreetmap-carto /home/renderer/src/openstreetmap-carto-backup
 
 # Start running
 COPY run.sh /
