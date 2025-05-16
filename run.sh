@@ -63,7 +63,7 @@ sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='gis'" | \
 # make sure required extensions are present (safe to re-run)
 sudo -u postgres psql -d gis -c "CREATE EXTENSION IF NOT EXISTS postgis;"
 sudo -u postgres psql -d gis -c "CREATE EXTENSION IF NOT EXISTS hstore;"
-    sudo -u postgres psql -d gis -c "CREATE EXTENSION hstore;"
+    sudo -u postgres psql -d gis -c "CREATE EXTENSION IF NOT EXISTS hstore;"
     sudo -u postgres psql -d gis -c "ALTER TABLE geometry_columns OWNER TO renderer;"
     sudo -u postgres psql -d gis -c "ALTER TABLE spatial_ref_sys OWNER TO renderer;"
     setPostgresPassword
