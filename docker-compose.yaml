@@ -15,7 +15,7 @@ services:
       OSM2PGSQL_EXTRA_ARGS: "--flat-nodes /cache/flat_nodes.bin"
     volumes:
       - /srv/osm-data/planet-v1.58.osm.pbf:/data/region.osm.pbf:ro
-      - /srv/osm-db:/var/lib/postgresql/16/main          # persist PGDATA
+      - /home/server-002/osm-db:/var/lib/postgresql/16/main          # persist PGDATA
       - /srv/osm-cache:/var/lib/mod_tile
       - /srv/osm-flat:/cache
       - /srv/osm-wal:/var/lib/postgresql/16/main/pg_wal
