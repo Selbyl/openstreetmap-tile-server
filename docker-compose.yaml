@@ -1,0 +1,48 @@
+services:
+  importer:
+    # ──────────────────────────────
+    # build the image FROM SOURCE
+    # ──────────────────────────────
+    build:
+      context: ./Dockerfile  # location of Dockerfile
+      dockerfile: Dockerfile                 # optional; default is fine
+    image: osm-tiles:local                   # tag so tileserver can reuse it
+    container_name: daylight_import
+    command: import
+    environment:
+      THREADS: "44"
+      OSM2PGSQL_CACHE: "150000"
+      OSM2PGSQL_EXTRA_ARGS: "--flat-nodes /cache/flat_nodes.bin"
+    volumes:
+      - /srv/osm-data/planet-v1.58.osm.pbf:/data/region.osm.pbf:ro
+      - /srv/osm-db:/var/lib/postgresql/16/main          # persist PGDATA
+      - /srv/osm-cache:/var/lib/mod_tile
+      - /srv/osm-flat:/cache
+      - /srv/osm-wal:/var/lib/postgresql/16/main/pg_wal
+      - /srv/osm-data/style/data:/data/style/data
+    deploy:
+      resources:
+        limits:
+          cpus: "44"
+          memory: 600G
+
+  tileserver:
+    image: osm-tiles:local                   # reuse the locally-built image
+    container_name: daylight_tiles
+    depends_on:
+      importer:
+        condition: service_completed_successfully
+    command: run
+    environment:
+      THREADS: "44"
+      UPDATES: "enabled"
+    volumes:
+      - /srv/osm-db:/var/lib/postgresql/16/main
+      - /srv/osm-data/planet-v1.58.osm.pbf:/data/region.osm.pbf:ro
+      - /srv/osm-cache:/var/lib/mod_tile
+      - /srv/osm-flat:/cache
+      - /srv/osm-wal:/var/lib/postgresql/16/main/pg_wal
+      - /srv/osm-data/style/data:/data/style/data
+    ports:
+      - "80:80"
+    restart: unless-stopped
