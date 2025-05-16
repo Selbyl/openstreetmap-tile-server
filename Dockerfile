@@ -38,7 +38,7 @@ RUN mkdir -p /home/renderer/src \
 ###########################################################################################################
 
 FROM compiler-common AS final
-
+COPY --from=compiler-stylesheet /root/openstreetmap-carto /home/renderer/src/openstreetmap-carto-backup
 # Based on
 # https://switch2osm.org/serving-tiles/manually-building-a-tile-server-18-04-lts/
 ENV DEBIAN_FRONTEND=noninteractive
