@@ -70,24 +70,35 @@ sudo -u postgres psql -d gis -c "CREATE EXTENSION IF NOT EXISTS hstore;"
     sudo -u postgres psql -d gis -c "ALTER TABLE spatial_ref_sys OWNER TO renderer;"
     setPostgresPassword
 
-  ###############################################################################
-# Download Daylight Global Data
+###############################################################################
+# Download OpenStreetMap Planet PBF via torrent (fastest)
 ###############################################################################
 
-# ── Settings ────────────────────────────────────────────────────────────────
-DAYLIGHT_RELEASE="${DAYLIGHT_RELEASE:-1.58}"
-BASE_URL="https://daylight-map-distribution.s3.us-west-1.amazonaws.com/release/v${DAYLIGHT_RELEASE}"
+PLANET_PBF="/data/planet-latest.osm.pbf"
+PLANET_TORRENT_URL="https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf.torrent"
 
-FILES=(
-  "planet-v${DAYLIGHT_RELEASE}.osm.pbf"
-  "ml-buildings-v${DAYLIGHT_RELEASE}.osm.pbf"
-  "fb-ml-roads-v${DAYLIGHT_RELEASE}.osc.gz"
-  "admin-v${DAYLIGHT_RELEASE}.osc.gz"
-  "coastlines-v${DAYLIGHT_RELEASE}.tgz"
-  "preferred-localization-v${DAYLIGHT_RELEASE}.tsv"
-  "important-features-v${DAYLIGHT_RELEASE}.json"
-)
-MAIN_PBF="/data/planet-v${DAYLIGHT_RELEASE}.osm.pbf"
+if [ ! -f "$PLANET_PBF" ]; then
+    echo "INFO: No planet PBF found — attempting download via torrent."
+
+    if command -v aria2c >/dev/null 2>&1; then
+        echo "INFO: Using aria2c to download OSM planet via torrent."
+        aria2c --dir=/data \
+               --out=planet-latest.osm.pbf \
+               --max-connection-per-server=16 \
+               --min-split-size=1M \
+               --split=16 \
+               --continue=true \
+               --summary-interval=10 \
+               "$PLANET_TORRENT_URL"
+    else
+        echo "WARNING: aria2c not installed — falling back to slow HTTP download."
+        wget -O "$PLANET_PBF" https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
+    fi
+else
+    echo "INFO: Reusing previously downloaded planet file: $(basename $PLANET_PBF)"
+fi
+
+MAIN_PBF="$PLANET_PBF"
 
 # ── Download loop ───────────────────────────────────────────────────────────
 for FILE in "${FILES[@]}"; do
@@ -121,8 +132,7 @@ else
     echo "INFO: $(basename "$MERGED_PBF") already exists – skipping merge."
 fi
 
-# from here on, use the merged file everywhere
-MAIN_PBF="$MERGED_PBF"
+
 
     if [ "${UPDATES:-}" == "enabled" ] || [ "${UPDATES:-}" == "1" ]; then
         # determine and set osmosis_replication_timestamp (for consecutive updates)

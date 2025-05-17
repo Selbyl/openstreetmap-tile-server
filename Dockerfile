@@ -6,7 +6,7 @@ ENV LC_ALL C.UTF-8
 RUN apt-get update \
 && apt-get install -y --no-install-recommends \
  ca-certificates gnupg lsb-release locales \
- wget curl \
+ wget curl aria2c \
  git-core unzip unrar \
 && locale-gen $LANG && update-locale LANG=$LANG \
 && sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' \
